@@ -1,0 +1,56 @@
+.home-page {
+  .box {
+    &-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .text-title {
+        font-weight: 600;
+        font-size: 30px;
+        line-height: 45px;
+        color: #EAE7D2;
+      }
+
+      .btn-view {
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 27px;
+        color: $white;
+        text-decoration: none;
+      }
+    }
+
+    &-content {
+      margin-top: 20px;
+    }
+  }
+
+  .movie-list {
+    display: flex;
+    gap: 30px;
+  }
+
+  .coming-soon {
+    margin-top: 120px;
+  }
+
+  .promotion {
+    margin-top: 120px;
+
+    &-list {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+
+      .thumb {
+        display: block;
+
+        img {
+          width: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+}

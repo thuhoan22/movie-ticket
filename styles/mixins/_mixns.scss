@@ -1,0 +1,703 @@
+// Layout
+@mixin respond-above($mq) {
+  @media (min-width: $mq) {
+    @content;
+  }
+}
+
+@mixin respond-between($mq-min, $mq-max) {
+  @media (min-width: $mq-min) and (max-width: $mq-max) {
+    @content;
+  }
+}
+
+@mixin respond-below($mq) {
+  @media (max-width: $mq) {
+    @content;
+  }
+}
+
+@mixin only-mobile-xs {
+  @include respond-below($screen-min) {
+    @content;
+  }
+}
+
+@mixin only-mobile {
+  @include respond-below(($screen-medium - 1px)) {
+    @content;
+  }
+}
+
+@mixin only-tablet {
+  @include respond-between($screen-medium, ($screen-xlarge - 1px)) {
+    @content;
+  }
+}
+
+@mixin only-pc {
+  @include respond-above($screen-xlarge) {
+    @content;
+  }
+}
+
+@mixin start-tablet {
+  @include respond-above($screen-medium) {
+    @content;
+  }
+}
+
+@mixin end-tablet {
+  @include respond-below(($screen-xlarge - 1px)) {
+    @content;
+  }
+}
+
+@mixin landscape {
+  @media screen and (orientation: landscape) and (max-width: $screen-landscape-max) {
+    @content;
+  }
+}
+
+@mixin landscape-tablet {
+  @media screen and (orientation: landscape) and (max-width: ($screen-xlarge - 1px)) and (pointer: coarse) {
+    @content;
+  }
+}
+
+@mixin breakpoint($point) {
+  @if $point==mobile {
+    @media screen and (max-width: ($screen-sm)) {
+      @content;
+    }
+  } 
+  @else if $point==tablet {
+    @media (min-width: $screen-md) and (max-width: $screen-lg) {
+      @content;
+    }
+  } 
+  @else if $point==desktop {
+    @media screen and (min-width: $screen-lg) {
+      @content;
+    }
+  }
+}
+
+@mixin css3-prefix($property, $value) {
+  -webkit-#{$property}: #{$value};
+  -khtml-#{$property}: #{$value};
+  -moz-#{$property}: #{$value};
+  -ms-#{$property}: #{$value};
+  -o-#{$property}: #{$value};
+  #{$property}: #{$value};
+}
+
+@mixin border-radius($radius: 5px) {
+  @include css3-prefix("border-radius", $radius);
+}
+
+@mixin hover-focus {
+  &:hover,
+  &:focus {
+    @content;
+  }
+}
+
+@mixin icon-align {
+  display: inline-block;
+  vertical-align: top;
+}
+
+@mixin ir {
+  @include icon-align;
+  overflow: hidden;
+  font-size: 0;
+  color: transparent;
+  text-indent: -9999px;
+}
+
+@mixin blind {
+  overflow: hidden;
+  position: absolute;
+  width: 0;
+  height: 0;
+  font-size: 0;
+  color: transparent;
+  line-height: 999px;
+}
+
+@mixin clearfix {
+  &:before,
+  &:after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+}
+
+// Arrow shape (Arrow)
+//   @include ico-angle('right', 10px, $color-black, 1px, 'absolute');
+//   @include ico-angle('down', 10px, #f00, 1px, 'static');
+@mixin ico-angle(
+  $direction: "right",
+  $size: 50px,
+  $color: $color-black,
+  $thick: 1px,
+  $position: "absolute"
+) {
+  width: $size;
+  height: $size;
+  border: 1px solid $color;
+  border-width: $thick $thick 0 0;
+  @include css3-prefix("transform-origin", center center);
+  content: "";
+
+  @if ($position == "absolute") {
+    position: absolute;
+    top: 50%;
+
+    @if ($direction == "right") {
+      right: 0;
+      @include css3-prefix("transform", translate(-25%, -40%) rotate(45deg));
+    } @else if ($direction == "left") {
+      left: 0;
+      @include css3-prefix(
+        "transform",
+        translateZ(0) translate(25%, -40%) rotate(-135deg)
+      );
+    } @else if ($direction == "up") {
+      right: 0;
+      @include css3-prefix(
+        "transform",
+        translateZ(0) translate(-25%, -40%) rotate(-45deg)
+      );
+    } @else if ($direction == "down") {
+      right: 0;
+      @include css3-prefix(
+        "transform",
+        translateZ(0) translate(-25%, -40%) rotate(135deg)
+      );
+    }
+  } @else if ($position == "static") {
+    @include icon-align();
+
+    @if ($direction == "right") {
+      @include css3-prefix("transform", translateZ(0) rotate(45deg));
+    } @else if ($direction == "left") {
+      @include css3-prefix("transform", translateZ(0) rotate(-135deg));
+    } @else if ($direction == "up") {
+      @include css3-prefix("transform", translateZ(0) rotate(-45deg));
+    } @else if ($direction == "down") {
+      @include css3-prefix(
+        "transform",
+        translateZ(0) translateY(-50%) rotate(135deg)
+      );
+    }
+  }
+}
+
+// X shape
+//  @include ico-cancel(15px, 4px, #aaa, 2px);
+@mixin ico-cancel($size: 40px, $thick: 2px, $color: #999, $padding: 0) {
+  @include icon-align();
+  position: relative;
+  overflow: hidden;
+  $sqrt_2: 1.41421356237;
+  width: $size + $padding * 2;
+  height: $size + $padding * 2;
+
+  &:before,
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: round($size * $sqrt_2 - $thick);
+    height: $thick;
+    background-color: $color;
+    content: "";
+  }
+
+  &:before {
+    @include css3-prefix(
+      transform,
+      translateZ(0) translate(-50%, -50%) rotate(45deg)
+    );
+  }
+
+  &:after {
+    @include css3-prefix(
+      transform,
+      translateZ(0) translate(-50%, -50%) rotate(135deg)
+    );
+  }
+}
+
+// + shape
+//   @include ico-add();
+@mixin ico-add($width: 2px, $height: 18px, $bg-color: #328cff) {
+  @include icon-align();
+  position: relative;
+
+  @if ($width <= $height) {
+    width: $height;
+    height: $height;
+  } @else if ($height <= $width) {
+    width: $width;
+    height: $width;
+  }
+
+  &:before,
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: $width;
+    height: $height;
+    background-color: $bg-color;
+    @include css3-prefix(transform, translate(-50%, -50%));
+    content: "";
+  }
+
+  &:after {
+    @include css3-prefix(transform, translate(-50%, -50%) rotate(90deg));
+  }
+}
+
+// Tap Highlight Color
+@mixin touch-color($bg: #{$color-base}, $font: #fff) {
+  &.is-touch {
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    background-color: $bg;
+    color: $font;
+    @content;
+  }
+}
+
+// Button
+//   @include btn;
+//   @include btnSize(medium);
+//   @include btnColor(primary);
+@mixin btn {
+  display: inline-block;
+  min-width: 154px;
+  height: 50px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 3px solid transparent;
+  border-radius: 30px;
+  background-color: map-get($black-base, 6);
+  @include fonts(16, 44, 700);
+  color: $white;
+  text-align: center;
+  vertical-align: middle;
+  letter-spacing: -0.48px;
+
+  &:hover {
+    background-color: map-get($etc-color, 4);
+  }
+
+  &:disabled {
+    background-color: map-get($black-base, 5);
+    color: map-get($black-base, 6);
+  }
+
+  @include breakpoint(tablet) {
+    height: auto;
+    border-width: 2px;
+    min-height: 36px;
+    padding: 0 10px;
+    @include fonts(16, 36);
+  }
+
+  @include only-mobile-xs() {
+    min-width: 140px;
+  }
+}
+
+@mixin btnType($type) {
+  @if ($type == "underline") {
+    min-width: auto;
+    min-height: auto;
+    height: auto;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    font-size: 0;
+    line-height: normal;
+
+    .btn__text {
+      display: inline-block;
+      position: relative;
+      @include fonts(16, 23, 400);
+      color: map-get($black-base, 6);
+      vertical-align: middle;
+
+      &:before {
+        @include position(absolute, false, 0, 0, 0);
+        height: 1px;
+        background-color: map-get($black-base, 6);
+        content: "";
+      }
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    @include breakpoint(tablet) {
+      .btn__text {
+        @include fonts(14, 20);
+      }
+    }
+  }
+
+  @if ($type == "square") {
+    border-radius: 2px;
+  }
+
+  @if ($type == "link") {
+    position: relative;
+    min-width: auto;
+    height: auto;
+    min-height: auto;
+    padding: 0 19px 0 0;
+    background-color: transparent;
+    @include fonts(14, 24, 400);
+    color: map-get($black-base, 8);
+
+    &:before {
+      @include ico-angle("right", 6px, $white, 2px, "absolute");
+      margin-top: -1px;
+      content: "";
+    }
+
+    &:hover {
+      background-color: transparent;
+      color: $white;
+    }
+  }
+
+  @if ($type == "stroke") {
+    background-color: transparent;
+    border-color: #f3f3f3;
+
+    &:hover {
+      background-color: map-get($black-base, 5);
+    }
+
+    &:disabled {
+      background-color: map-get($black-base, 5);
+      border-color: map-get($black-base, 6);
+      color: map-get($black-base, 6);
+    }
+
+    @include breakpoint(tablet) {
+      border-width: 2px;
+    }
+  }
+
+  @if ($type == "disabled") {
+    background-color: map-get($black-base, 5);
+    color: map-get($black-base, 6);
+    cursor: default;
+
+    &.btn--stroke {
+      border-color: map-get($black-base, 6);
+    }
+
+    &:hover {
+      background-color: map-get($black-base, 5);
+    }
+  }
+}
+
+@mixin btnSize($size) {
+  @if ($size == "small") {
+    min-width: 52px;
+    min-height: auto;
+    height: 36px;
+    padding: 0 8px;
+    border: none;
+    box-sizing: border-box;
+    @include fonts(14, 36, 400);
+    letter-spacing: 0;
+
+    @include breakpoint(tablet) {
+      height: 30px;
+      @include fonts(12, 30);
+    }
+  }
+}
+
+@mixin btnColor($color) {
+  @if ($color == "primary") {
+    background-color: $primary;
+    color: $white;
+
+    &:hover {
+      background-color: map-get($etc-color, 6);
+    }
+
+    @include btnDisabled();
+  }
+
+  @if ($color == "positive") {
+    background-color: $positive;
+    color: $white;
+
+    &:hover {
+      background-color: map-get($etc-color, 7);
+    }
+
+    @include btnDisabled();
+  }
+
+  @if ($color == "secondary") {
+    background-color: $secondary;
+    color: $white;
+
+    &:hover {
+      background-color: map-get($etc-color, 5);
+    }
+
+    @include btnDisabled();
+  }
+}
+
+@mixin btnDisabled() {
+  &:disabled,
+  &.btn--disabled {
+    background-color: map-get($black-base, 5);
+    color: map-get($black-base, 6);
+    cursor: default;
+  }
+}
+
+// Position
+// @include position(absolute, 0, false, false, 0);
+//   -> top: 0, left: 0;
+// @include position-full(absolute);
+//   -> top: 0; right: 0; bottom: 0; left: 0;
+@mixin position(
+  $position,
+  $top: false,
+  $right: false,
+  $bottom: false,
+  $left: false
+) {
+  position: $position;
+  @if $top {
+    top: $top;
+  }
+  @if $right {
+    right: $right;
+  }
+  @if $bottom {
+    bottom: $bottom;
+  }
+  @if $left {
+    left: $left;
+  }
+}
+
+@mixin position-full($position) {
+  position: $position;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+// Ellipsis
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Multi Ellipsis (only.webkit)
+@mixin multi-ellipsis($line) {
+  display: block;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+// Font Setting
+$root-em: 10;
+$initial-font-size: 14;
+
+// 1. font-size, line-height, font-weight 지정
+// 2. line-height is calculated in em relative to font-size. However, if line-height is specified in px, it is returned in px, not em.
+// 3. line-height and font-weight can be omitted
+// (reference) @include fonts(14,18,300); or @include fonts(14,18px,"normal");
+@mixin fonts($size: $initial-font-size, $lineHeight: false, $bold: false) {
+  @if unitless($size) {
+    // @warn "Assuming #{$size} to be in pixels";
+    $size: 1px * $size;
+  }
+  font-size: $size;
+  $lhr: 0;
+  @if $lineHeight {
+    @if unitless($lineHeight) {
+      // @warn "Assuming #{$size} to be in pixels";
+      $lineHeight: 1px * $lineHeight;
+      $lh: round($lineHeight / $size * 100) / 100;
+      $lhr: $lh * 1em;
+    } @else {
+      $lhr: $lineHeight;
+    }
+    line-height: $lhr;
+  }
+  @if $bold {
+    font-weight: ($bold);
+  }
+}
+
+// Safe Area
+// @include safeArea(true, padding, 10px 5px right left);
+// @include safeArea(false, padding, 5px bottom);
+//   $all: true / false(multi / single)
+//   $attr: selector
+//   $val...: value direction (**direction: right bottom left)
+@mixin safeArea($all: false, $attr: padding, $val...) {
+  @if (($attr == padding or $attr == margin) and $all == false) {
+    #{$attr}-#{separateVal($val, false)}: separateVal($val, true);
+    #{$attr}-#{separateVal($val, false)}: safeAresLoop(
+      $all,
+      "env",
+      $attr,
+      $val
+    );
+    #{$attr}-#{separateVal($val, false)}: safeAresLoop(
+      $all,
+      "constant",
+      $attr,
+      $val
+    );
+  } @else {
+    #{$attr}: separateVal($val, true);
+    #{$attr}: safeAresLoop($all, "env", $attr, $val);
+    #{$attr}: safeAresLoop($all, "constant", $attr, $val);
+  }
+}
+
+// ScrollBar
+@mixin scrollbar($width: 3px, $type: false) {
+  @if ($type == false) {
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: $width * 6;
+    }
+  } @else if($type == "search") {
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: $width * 7;
+    }
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: $width * 2 solid transparent;
+    border-radius: 100px;
+    background-color: #505053;
+    background-clip: padding-box;
+  }
+}
+
+@mixin scrollbar-pc($trackColor: transparent, $type: false) {
+  // IE
+  scrollbar-face-color: #505053;
+  scrollbar-track-color: $trackColor;
+  // scrollbar-arrow-color: #505053;
+  scrollbar-arrow-color: $trackColor;
+  scrollbar-highlight-color: none;
+  scrollbar-3dlight-color: none;
+  scrollbar-shadow-color: $trackColor;
+  scrollbar-darkshadow-color: none;
+
+  // firefox
+  scrollbar-width: thin;
+  scrollbar-color: #505053 transparent;
+
+  // chrome, safari
+  @include scrollbar(4px, $type);
+}
+
+// Swiper Button
+// @include swiperBtn(absolute, 104px);
+//   -> Returns a button with position:absolute, top: 104px.
+@mixin swiperBtn($position: false, $top: false) {
+  @if (($position != false) and $top != false) {
+    @include position($position, $top, false, false, false);
+  }
+
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  border-radius: 50%;
+  background-color: #{rgba($black, 0.5)};
+
+  &:before {
+    @include ico-angle("right", 12px, $white, 2px, "static");
+    margin-top: 3px;
+    content: "";
+
+    @include breakpoint(tablet) {
+      width: 11px;
+      height: 11px;
+    }
+  }
+
+  &.swiper-button-disabled {
+    pointer-events: auto;
+  }
+
+  &--prev {
+    left: 12px;
+
+    &:before {
+      margin-left: 6px;
+      transform: rotate(-135deg);
+    }
+  }
+
+  &--next {
+    right: 6px;
+
+    &:before {
+      margin-right: 6px;
+    }
+  }
+}
+
+@mixin swiperPagination {
+  font-size: 0;
+  line-height: normal;
+
+  &-bullet {
+    width: 6px;
+    height: 6px;
+    margin: 0 4px;
+    border-radius: 4px;
+    background-color: $white;
+    opacity: 0.3;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+
+    &-active {
+      width: 24px;
+      background-color: $primary;
+      opacity: 1;
+    }
+  }
+}

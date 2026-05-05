@@ -1,0 +1,155 @@
+.movie-detail-page {
+  .detail-back {
+    display: inline-flex;
+    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #eae7d2;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $white;
+    }
+  }
+
+  .detail-wrap {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+  }
+
+  .detail-thumb {
+    flex-shrink: 0;
+    width: 380px;
+    overflow: hidden;
+    border-radius: 6px;
+
+    .card-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+  }
+
+  .detail-info {
+    flex: 1;
+    min-width: 0;
+
+    .text {
+      &-title {
+        margin-bottom: 16px;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: $white;
+        text-transform: uppercase;
+      }
+
+      &-desc {
+        color: $white;
+      }
+    }
+
+    .detail-meta {
+      margin-bottom: 28px;
+    }
+  }
+
+  .detail-tab {
+    margin-top: 48px;
+  }
+
+  .tab-list {
+    display: flex;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid rgba(234, 231, 210, 0.25);
+  }
+
+  .tab-item {
+    button {
+      position: relative;
+      padding: 12px 24px;
+      margin-bottom: -1px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 600;
+      color: #eae7d2;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+
+      &:hover {
+        color: $white;
+      }
+    }
+
+    &.is-active button {
+      border-bottom-color: $white;
+      color: $white;
+    }
+  }
+
+  .tab-content {
+    padding-top: 24px;
+    min-height: 120px;
+  }
+
+  .detail-description {
+    max-width: 920px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: #eae7d2;
+    white-space: pre-wrap;
+  }
+
+  .detail-trailer {
+    max-width: 920px;
+  }
+
+  .detail-trailer-frame {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-bottom: 56.25%;
+    border-radius: 6px;
+    background: $black;
+
+    iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  }
+
+  .detail-trailer-fallback {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #eae7d2;
+
+    a {
+      color: $white;
+      word-break: break-all;
+    }
+  }
+
+  .detail-status {
+    margin: 0;
+    font-size: 15px;
+    color: #eae7d2;
+  }
+
+  .detail-error {
+    color: #eae7d2;
+  }
+}

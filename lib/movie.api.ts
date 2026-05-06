@@ -13,7 +13,7 @@ const movieListSelect = `
     start_time,
     room_name,
     theater_id,
-    theaters!showtimes_theater_id_fkey (
+    theaters (
       id,
       name,
       city

@@ -7,13 +7,20 @@ import { lockSeat } from "@/lib/lockSeat.api";
 type SeatMapProps = {
   showtimeId: string;
   userId?: string;
-  onSelect: (seatIds: number[]) => void;
+  onSelect: (seats: SelectedSeat[]) => void;
+};
+
+export type SelectedSeat = {
+  id: number;
+  label: string;
+  type: string;
 };
 
 export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) {
   const [seats, setSeats] = useState<any[]>([]);
   const [lockedSeats, setLockedSeats] = useState<any[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
+  const [seatError, setSeatError] = useState<string>("");
 
   useEffect(() => {
     if (!showtimeId) return;
@@ -22,15 +29,16 @@ export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) 
       const { data, error } = await supabase
         .from("seats")
         .select("*")
-        .eq("showtime_id", Number(showtimeId));
+        .eq("showtime_id", showtimeId);
 
       if (error) {
         console.error(error);
+        setSeatError(error.message || "Failed to load seats");
         return;
       }
 
       console.log("FETCHED SEATS:", data?.length);
-
+      setSeatError("");
       setSeats(data || []);
     };
 
@@ -40,13 +48,24 @@ export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) 
   const isLocked = (id: number) =>
     lockedSeats.some((l) => l.seat_id === id);
 
+  const emitSelectedSeats = (nextSelectedIds: number[]) => {
+    const selectedSeats = seats
+      .filter((s) => nextSelectedIds.includes(s.id))
+      .map((s) => ({
+        id: s.id,
+        label: `${s.row}${s.number}`,
+        type: s.type ?? "standard",
+      }));
+    onSelect(selectedSeats);
+  };
+
   const toggleSeat = async (seat: any) => {
     if (isLocked(seat.id)) return;
 
     if (selected.includes(seat.id)) {
       const updated = selected.filter((s) => s !== seat.id);
       setSelected(updated);
-      onSelect(updated);
+      emitSelectedSeats(updated);
     } else {
       await lockSeat({
         seatId: seat.id,
@@ -56,7 +75,7 @@ export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) 
 
       const updated = [...selected, seat.id];
       setSelected(updated);
-      onSelect(updated);
+      emitSelectedSeats(updated);
     }
   };
 
@@ -74,6 +93,8 @@ export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) 
   return (
     <div className="seat-area">
       <div className="screen">SCREEN</div>
+      {seatError ? <p>Không tải được ghế: {seatError}</p> : null}
+      {!seatError && seats.length === 0 ? <p>Chưa có dữ liệu ghế cho suất chiếu này.</p> : null}
 
       {/* SEATS */}
       <div className="seat-map">
@@ -102,7 +123,7 @@ export default function SeatMap({ showtimeId, userId, onSelect }: SeatMapProps) 
                       <button
                         disabled={locked}
                         onClick={() => toggleSeat(seat)}
-                        className={`seat-item ${seat.type}${locked ? "locked" : ""}${isSelected ? "selected" : ""}`}
+                        className={`seat-item ${seat.type}${locked ? "locked" : ""} ${isSelected ? "selected" : ""}`}
                       >
                         {seat.number}
                       </button>

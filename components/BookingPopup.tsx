@@ -8,24 +8,25 @@ type Showtime = {
   id: string;
   start_time: string;
   room_name?: string;
+  theater_id?: string | number;
   theaters?: {
-    id: string;
+    id: string | number;
     name: string;
     city: string;
     country?: string;
   } | {
-    id: string;
+    id: string | number;
     name: string;
     city: string;
     country?: string;
   }[];
   theater?: {
-    id: string;
+    id: string | number;
     name: string;
     city: string;
     country?: string;
   } | {
-    id: string;
+    id: string | number;
     name: string;
     city: string;
     country?: string;
@@ -43,9 +44,10 @@ type BookingPopupProps = {
 
 export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
   const router = useRouter();
-  const [showtimes, setShowtimes] = useState<Showtime[]>(movie?.showtimes || []);
+  const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [debugError, setDebugError] = useState<string>("");
   const [debugAccessibleShowtimes, setDebugAccessibleShowtimes] = useState<number | null>(null);
+  const [loadingShowtimes, setLoadingShowtimes] = useState(false);
 
   const getTheater = (showtime: Showtime) => {
     const source = showtime.theaters ?? showtime.theater;
@@ -56,19 +58,15 @@ export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
   // STATE
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
-  const [selectedShowtime, setSelectedShowtime] = useState<any>(null);
+  const [selectedShowtime, setSelectedShowtime] = useState<Showtime | null>(null);
 
   useEffect(() => {
-    setShowtimes(movie?.showtimes || []);
-  }, [movie]);
-
-  useEffect(() => {
-    const hasInitial = (movie?.showtimes || []).length > 0;
-    if (hasInitial || !movie?.id) return;
+    if (!movie?.id) return;
 
     let cancelled = false;
 
     const fetchShowtimes = async () => {
+      setLoadingShowtimes(true);
       const { count } = await supabase
         .from("showtimes")
         .select("id", { count: "exact", head: true });
@@ -82,7 +80,7 @@ export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
             start_time,
             room_name,
             theater_id,
-            theaters!showtimes_theater_id_fkey (
+            theaters (
               id,
               name,
               city
@@ -97,11 +95,49 @@ export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
       if (error) {
         setDebugError(error.message || "Failed to fetch showtimes");
         setShowtimes([]);
+        setLoadingShowtimes(false);
         return;
       }
 
+      const baseRows = (data || []) as Showtime[];
+
+      const missingTheaterRows = baseRows.filter(
+        (s) => !getTheater(s)?.name && s.theater_id,
+      );
+
+      if (missingTheaterRows.length === 0) {
+        setDebugError("");
+        setShowtimes(baseRows);
+        setLoadingShowtimes(false);
+        return;
+      }
+
+      // Fallback: khi nested relation không trả về (FK rename/RLS), lấy theater theo ids.
+      const theaterIds = [
+        ...new Set(missingTheaterRows.map((s) => s.theater_id).filter(Boolean)),
+      ] as string[];
+
+      const { data: theaterRows } = await supabase
+        .from("theaters")
+        .select("id, name, city")
+        .in("id", theaterIds);
+      if (cancelled) return;
+
+      const byId = new Map(
+        (theaterRows || []).map((t: { id: string | number; name: string; city: string }) => [
+          String(t.id),
+          t,
+        ]),
+      );
+      const hydrated = baseRows.map((s) => {
+        if (getTheater(s)?.name) return s;
+        const t = s.theater_id ? byId.get(String(s.theater_id)) : undefined;
+        return t ? { ...s, theaters: t } : s;
+      });
+
       setDebugError("");
-      setShowtimes((data || []) as Showtime[]);
+      setShowtimes(hydrated);
+      setLoadingShowtimes(false);
     };
 
     fetchShowtimes();
@@ -109,7 +145,7 @@ export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
     return () => {
       cancelled = true;
     };
-  }, [movie?.id, movie?.showtimes]);
+  }, [movie?.id]);
 
   // generate 30 ngày
   const dates = useMemo(() => {
@@ -184,6 +220,18 @@ export default function BookingPopup({ movie, onClose }: BookingPopupProps) {
             Debug: accessible showtimes rows = {debugAccessibleShowtimes ?? "N/A"}
           </p>
           {debugError ? <p className="text-debug">Debug error: {debugError}</p> : null} */}
+          {loadingShowtimes ? <p>Loading showtimes...</p> : null}
+          {/* {!loadingShowtimes && debugError ? (
+            <p>
+              Không tải được dữ liệu rạp/suất chiếu. ({debugError})
+            </p>
+          ) : null} */}
+          {/* {!loadingShowtimes && !debugError && showtimes.length === 0 ? (
+            <p>
+              Chưa có suất chiếu cho phim này. (movieId: {movie.id || "N/A"} | total showtimes table:{" "}
+              {debugAccessibleShowtimes ?? "N/A"})
+            </p>
+          ) : null} */}
           {/* Date */}
           <div className="select-area select-date">
             <div className="date-wrap">
